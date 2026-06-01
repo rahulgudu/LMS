@@ -32,7 +32,9 @@ export const sendToken = (user: IUser, statusCode: number, res: Response) => {
     expires: new Date(Date.now() + refreshTokenExpire * 1000),
     maxAge: accessTokenExpire * 1000,
     httpOnly: true,
-    sameSite: "lax",
+    // sameSite: "lax",
+    sameSite: "none", // only for codespace needs to removed while in production
+    secure: true, // only for codespace needs to removed while in production
   };
 
   const refreshTokenOptions: ITokenOptions = {

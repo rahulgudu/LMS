@@ -8,6 +8,7 @@ import ejs from "ejs";
 import path from "node:path";
 import sendMail from "../utils/sendMail";
 import { sendToken } from "../utils/jwt";
+import { redis } from "../utils/redis";
 interface IRegistrationBody {
   email: string;
   password: string;
@@ -154,20 +155,19 @@ export const loginUser = CatchAsyncError(
         return next(new ErrorHandler("Please provide email and password", 400));
       }
 
-      const user = await User.findOne({email}).select("+password");
+      const user = await User.findOne({ email }).select("+password");
 
-      if(!user) {
+      if (!user) {
         return next(new ErrorHandler("Invalid email or password", 400));
       }
 
       const isPasswordMatch = await user?.comparePassword(password);
 
-      if(!isPasswordMatch) {
+      if (!isPasswordMatch) {
         return next(new ErrorHandler("Invalid email or password", 400));
       }
 
       sendToken(user, 200, res);
-
     } catch (error: any) {
       return next(new ErrorHandler(error.message, 400));
     }
@@ -178,9 +178,10 @@ export const loginUser = CatchAsyncError(
 export const logoutUser = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      res.cookie("accessToken", "", {maxAge: 1});
-      res.cookie("refreshToken", "", {maxAge: 1});
-
+      res.cookie("accessToken", "", { maxAge: 1 });
+      res.cookie("refreshToken", "", { maxAge: 1 });
+      const userId = req.user?._id || "";
+      await redis.del(userId.toString());
       res.status(200).json({
         success: true,
         message: "Logged out successfully",
