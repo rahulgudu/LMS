@@ -78,12 +78,22 @@ userSchema.pre<IUser>("save", async function () {
 
 // sign access token
 userSchema.methods.SignAccessToken = function () {
-  return jwt.sign({ id: this._id }, process.env.ACCESS_TOKEN || "");
+  const accessTokenSecret = process.env.ACCESS_TOKEN as string;
+  const accessTokenExpiresIn = process.env.ACCESS_TOKEN_EXPIRES || "5m";
+
+  return jwt.sign({ id: this._id }, accessTokenSecret, {
+    expiresIn: accessTokenExpiresIn,
+  } as jwt.SignOptions);
 };
 
 // sign refresh token
 userSchema.methods.SignRefreshToken = function () {
-  return jwt.sign({ id: this._id }, process.env.REFRESH_TOKEN || "");
+  const refreshTokenSecret = process.env.REFRESH_TOKEN as string;
+  const refreshTokenExpiresIn = process.env.REFRESH_TOKEN_EXPIRES || "3d";
+
+  return jwt.sign({ id: this._id }, refreshTokenSecret, {
+    expiresIn: refreshTokenExpiresIn,
+  } as jwt.SignOptions);
 };
 
 // compare password
