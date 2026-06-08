@@ -13,6 +13,7 @@ import {
   sendToken,
 } from "../utils/jwt";
 import { redis } from "../utils/redis";
+import { getUserById } from "../services/user.service";
 interface IRegistrationBody {
   email: string;
   password: string;
@@ -203,14 +204,12 @@ export const updateAccessToken = CatchAsyncError(
     try {
       const refresh_token = req.cookies.refreshToken as string;
 
-      console.log("env" ,process.env.REFRESH_TOKEN)
-      const decoded = await jwt.verify(
+      console.log("env", process.env.REFRESH_TOKEN);
+      const decoded = (await jwt.verify(
         refresh_token,
         process.env.REFRESH_TOKEN as string,
-      ) as JwtPayload;
+      )) as JwtPayload;
 
-      
-      
       const message = "Could not refresh token";
       if (!decoded) {
         return next(new ErrorHandler(message, 400));
@@ -249,8 +248,47 @@ export const updateAccessToken = CatchAsyncError(
       });
     } catch (error: any) {
       console.log("here");
-      
+
       return next(new ErrorHandler(error.message, 400));
+    }
+  },
+);
+
+// get user info
+export const getUserInfo = CatchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userId = req?.user?._id;
+      getUserById(String(userId), res);
+    } catch (error) {
+      return next(new ErrorHandler("Failed to fetch user info", 400));
+    }
+  },
+);
+
+interface ISocialAuthBody {
+  email: string;
+  name: string;
+  avatar: object;
+}
+// social auth
+export const socialAuth = CatchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { name, email, avatar } = req.body as ISocialAuthBody;
+      const user = await User.findOne({ email });
+      if (!user) {
+        const newUser = await User.create({
+          name,
+          email,
+          avatar,
+        });
+        sendToken(newUser, 200, res);
+      } else {
+        sendToken(user, 200, res);
+      }
+    } catch (error) {
+      return next(new ErrorHandler("Social auth failed", 400));
     }
   },
 );
