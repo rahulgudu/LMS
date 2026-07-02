@@ -67,7 +67,6 @@ const commentSchema = new mongoose.Schema<IComment>({
 
 const courseDataSchema = new mongoose.Schema<ICourseData>({
   videoUrl: String,
-  videoThumbnail: Object,
   title: String,
   videoSection: String,
   description: String,
@@ -95,11 +94,9 @@ const courseSchema = new mongoose.Schema<ICourse>({
   },
   thumbnail: {
     public_id: {
-      required: true,
       type: String,
     },
     url: {
-      required: true,
       type: String,
     },
   },

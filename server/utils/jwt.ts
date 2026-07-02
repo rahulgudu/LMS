@@ -21,16 +21,16 @@ export const accessTokenOptions: ITokenOptions = {
   expires: new Date(Date.now() + accessTokenExpire * 60 * 1000), // e.g., minutes to ms
   maxAge: accessTokenExpire * 60 * 1000,
   httpOnly: true,
-  sameSite: "none", // only for codespaces, in production it should be "lax" or "strict"
-  secure: true, // only for codespaces, in production it should be removed
+  sameSite: "lax", // only for codespaces, in production it should be "lax" or "strict"
+  // secure: true, // only for codespaces, in production it should be removed
 };
 
 export const refreshTokenOptions: ITokenOptions = {
   expires: new Date(Date.now() + refreshTokenExpire * 24 * 60 * 60 * 1000), // e.g., days to ms
   maxAge: refreshTokenExpire * 24 * 60 * 60 * 1000,
   httpOnly: true,
-  sameSite: "none", // only for codespaces, in production it should be "lax" or "strict"
-  secure: true, // only for codespaces, in production it should be removed
+  sameSite: "lax", // only for codespaces, in production it should be "lax" or "strict"
+  // secure: true, // only for codespaces, in production it should be removed
 };
 
 export const sendToken = (user: IUser, statusCode: number, res: Response) => {
